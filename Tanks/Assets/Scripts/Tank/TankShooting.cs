@@ -4,12 +4,14 @@ using UnityEngine.UI;
 public class TankShooting : MonoBehaviour
 {
     public int m_PlayerNumber = 1;       
-    public Rigidbody m_Shell;            
+    public Rigidbody m_ShellOne;
+    public Rigidbody m_ShellTwo;
     public Transform m_FireTransform;    
     public Slider m_AimSlider;           
     public AudioSource m_ShootingAudio;  
     public AudioClip m_ChargingClip;     
-    public AudioClip m_FireClip;         
+    public AudioClip m_FireClip;
+   
     public float m_MinLaunchForce = 15f; 
     public float m_MaxLaunchForce = 30f; 
     public float m_MaxChargeTime = 0.75f;
@@ -18,7 +20,9 @@ public class TankShooting : MonoBehaviour
     private string m_FireButton;         
     private float m_CurrentLaunchForce;  
     private float m_ChargeSpeed;         
-    private bool m_Fired;                
+    private bool m_Fired;
+    private int m_shellToFire = 1;
+
 
 
     private void OnEnable()
@@ -75,14 +79,33 @@ public class TankShooting : MonoBehaviour
     private void Fire()
     {
         // Instantiate and launch the shell.
+        
         m_Fired = true;
 
-        Rigidbody shellInstance = Instantiate(m_Shell, m_FireTransform.position, m_FireTransform.rotation) as Rigidbody;
-        shellInstance.velocity = m_CurrentLaunchForce * m_FireTransform.forward;
+        if (m_shellToFire == 1)
+        {
+            Rigidbody shellInstance = Instantiate(m_ShellOne, m_FireTransform.position, m_FireTransform.rotation) as Rigidbody;
+            shellInstance.velocity = m_CurrentLaunchForce * m_FireTransform.forward;
 
-        m_ShootingAudio.clip = m_FireClip;
-        m_ShootingAudio.Play();
+            m_ShootingAudio.clip = m_FireClip;
+            m_ShootingAudio.Play();
 
-        m_CurrentLaunchForce = m_MinLaunchForce;
+            m_CurrentLaunchForce = m_MinLaunchForce;
+            m_shellToFire++;
+        }
+        else if (m_shellToFire == 2)
+        {
+            Rigidbody shellInstance = Instantiate(m_ShellTwo, m_FireTransform.position, m_FireTransform.rotation) as Rigidbody;
+            shellInstance.velocity = m_CurrentLaunchForce * m_FireTransform.forward;
+
+            m_ShootingAudio.clip = m_FireClip;
+            m_ShootingAudio.Play();
+
+            m_CurrentLaunchForce = m_MinLaunchForce;
+            m_shellToFire--;
+        }
+
+       
+       
     }
 }

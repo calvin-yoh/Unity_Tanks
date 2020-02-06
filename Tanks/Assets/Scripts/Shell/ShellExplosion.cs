@@ -25,7 +25,6 @@ public class ShellExplosion : MonoBehaviour
         for (int i = 0; i < colliders.Length; i++)
         {
             Rigidbody targetRigidbody = colliders[i].GetComponent<Rigidbody>();
-
             if (!targetRigidbody)
                 continue;
 
