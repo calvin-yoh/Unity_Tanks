@@ -22,7 +22,6 @@ public class LavaFieldScript : MonoBehaviour
         for (int i = 0; i < colliders.Length; i++)
         {
             Rigidbody targetRigidbody = colliders[i].GetComponent<Rigidbody>();
-            Debug.Log("this is a tank");
 
             if (!targetRigidbody)
                 continue;

@@ -10,16 +10,22 @@ public class GameManager : MonoBehaviour
     public float m_EndDelay = 3f;           
     public CameraControl m_CameraControl;   
     public Text m_MessageText;              
-    public GameObject m_TankPrefab;         
-    public TankManager[] m_Tanks;           
+    public GameObject m_TankPrefab;
+    public GameObject h_healthPackPrefab;
+    public HealthPack h_healthPackScript;
+    public TankManager[] m_Tanks;
 
 
-    private int m_RoundNumber;              
+    private int m_RoundNumber;
+    private int h_healthPackSpawnPoint;
     private WaitForSeconds m_StartWait;     
     private WaitForSeconds m_EndWait;       
     private TankManager m_RoundWinner;
     private TankManager m_GameWinner;
     private GameObject[] weapons;
+    private GameObject[] healthPacks;
+    private System.Random rnd = new System.Random();
+
 
 
     private void Start()
@@ -95,9 +101,15 @@ public class GameManager : MonoBehaviour
         EnableTankControl();
 
         m_MessageText.text = string.Empty;
+      
 
         while (!OneTankLeft())
         {
+            healthPacks = GameObject.FindGameObjectsWithTag("HealthPack");
+            if (healthPacks.Length == 0)
+            {
+                SpawnHealthPack();
+            }
             yield return null;
         }
     }
@@ -217,5 +229,26 @@ public class GameManager : MonoBehaviour
         {
             m_Tanks[i].DisableControl();
         }
+    }
+
+    private void SpawnHealthPack()
+    {
+        h_healthPackSpawnPoint = rnd.Next(1, 5);
+        switch (h_healthPackSpawnPoint)
+        {
+            case 1:
+                GameObject shellInstanceOne = Instantiate(h_healthPackPrefab, h_healthPackScript.h_spawnPointOne.position, h_healthPackScript.h_spawnPointOne.rotation) as GameObject;
+                break;
+            case 2:
+                GameObject shellInstanceTwo = Instantiate(h_healthPackPrefab, h_healthPackScript.h_spawnPointTwo.position, h_healthPackScript.h_spawnPointTwo.rotation) as GameObject;
+                break;
+            case 3:
+                GameObject shellInstanceThree = Instantiate(h_healthPackPrefab, h_healthPackScript.h_spawnPointThree.position, h_healthPackScript.h_spawnPointThree.rotation) as GameObject;
+                break;
+            case 4:
+                GameObject shellInstanceFour = Instantiate(h_healthPackPrefab, h_healthPackScript.h_spawnPointFour.position, h_healthPackScript.h_spawnPointFour.rotation) as GameObject;
+                break;
+        }
+
     }
 }
