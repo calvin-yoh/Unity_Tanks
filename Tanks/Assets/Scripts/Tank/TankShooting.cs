@@ -6,7 +6,9 @@ public class TankShooting : MonoBehaviour
     public int m_PlayerNumber = 1;       
     public Rigidbody m_ShellOne;
     public Rigidbody m_ShellTwo;
-    public Transform m_FireTransform;    
+    public Rigidbody m_ShellThree;
+    public Transform m_FireTransform;
+    public Transform m_MineTransform;
     public Slider m_AimSlider;           
     public AudioSource m_ShootingAudio;  
     public AudioClip m_ChargingClip;     
@@ -72,6 +74,9 @@ public class TankShooting : MonoBehaviour
             //we released the button, having not fired yet
             Fire();
         }
+        
+        // Check with weapon is currently selected
+
 
     }
 
@@ -102,10 +107,21 @@ public class TankShooting : MonoBehaviour
             m_ShootingAudio.Play();
 
             m_CurrentLaunchForce = m_MinLaunchForce;
-            m_shellToFire--;
+            m_shellToFire++;
+        }
+        else if (m_shellToFire == 3)
+        {
+            Rigidbody shellInstance = Instantiate(m_ShellThree, m_MineTransform.position, m_MineTransform.rotation) as Rigidbody;
+
+            m_ShootingAudio.clip = m_FireClip;
+            m_ShootingAudio.Play();
+
+            m_CurrentLaunchForce = m_MinLaunchForce;
+
+            m_shellToFire = 1; ;
         }
 
-       
-       
+
+
     }
 }
