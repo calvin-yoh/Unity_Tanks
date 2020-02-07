@@ -18,7 +18,8 @@ public class GameManager : MonoBehaviour
     private WaitForSeconds m_StartWait;     
     private WaitForSeconds m_EndWait;       
     private TankManager m_RoundWinner;
-    private TankManager m_GameWinner;       
+    private TankManager m_GameWinner;
+    private GameObject[] weapons;
 
 
     private void Start()
@@ -106,6 +107,13 @@ public class GameManager : MonoBehaviour
     {
         DisableTankControl();
 
+        //removes all weapons types still on field; Mines, LavaFields
+        weapons = GameObject.FindGameObjectsWithTag("Weapons");
+        foreach (GameObject weapon in weapons)
+        {
+            Destroy(weapon);
+        }
+
         m_RoundWinner = null;
 
         m_RoundWinner = GetRoundWinner();
@@ -120,6 +128,7 @@ public class GameManager : MonoBehaviour
         string message = EndMessage();
         m_MessageText.text = message;
 
+        weapons = null;
 
         yield return m_EndWait;
     }
