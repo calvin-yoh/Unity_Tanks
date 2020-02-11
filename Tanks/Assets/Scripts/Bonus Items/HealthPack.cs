@@ -4,30 +4,14 @@ using UnityEngine;
 
 public class HealthPack : MonoBehaviour
 {
-
-    public Transform h_spawnPointOne;
-    public Transform h_spawnPointTwo;
-    public Transform h_spawnPointThree;
-    public Transform h_spawnPointFour;
-
-    public float HealthRegened = -30f;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    [SerializeField] private const Transform spawnPointOne = null;;
+    [SerializeField] private const Transform spawnPointTwo = null;
+    [SerializeField] private const Transform spawnPointThree = null;
+    [SerializeField] private const Transform spawnPointFour = null;
+    [SerializeField] private const float HealthRegened = 30f;
 
     private void OnTriggerEnter(Collider other)
     {
-        // Find all the tanks in an area around the shell and damage them.
-
         Rigidbody targetRigidbody = other.GetComponent<Rigidbody>();
 
         if (!targetRigidbody)
@@ -46,6 +30,5 @@ public class HealthPack : MonoBehaviour
             targetHealth.TakeDamage(HealthRegened);
         }
         Destroy(gameObject);
-
     }
 }
