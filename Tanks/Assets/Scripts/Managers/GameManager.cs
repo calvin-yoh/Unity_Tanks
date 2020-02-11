@@ -5,33 +5,31 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    public int m_NumRoundsToWin = 5;        
-    public float m_StartDelay = 3f;         
-    public float m_EndDelay = 3f;           
-    public CameraControl m_CameraControl;   
-    public Text m_MessageText;              
-    public GameObject m_TankPrefab;
-    public GameObject h_healthPackPrefab;
-    public HealthPack h_healthPackScript;
-    public TankManager[] m_Tanks;
-
-
-    private int m_RoundNumber;
-    private int h_healthPackSpawnPoint;
-    private WaitForSeconds m_StartWait;     
-    private WaitForSeconds m_EndWait;       
-    private TankManager m_RoundWinner;
-    private TankManager m_GameWinner;
-    private GameObject[] weapons;
-    private GameObject[] healthPacks;
+    private int roundNumber = null;
+    private int healthPackSpawnPoint = null;
+    private WaitForSeconds startWait = null;     
+    private WaitForSeconds endWait = null;       
+    private TankManager roundWinner = null;
+    private TankManager gameWinner = null;
+    private GameObject[] weapons = null;
+    private GameObject[] healthPacks = null;
     private System.Random rnd = new System.Random();
+    private GameObject shellInstance = null;
 
-
+    [SerializeField] private const int numRoundsToWin = 5;
+    [SerializeField] private const float startDelay = 3f;
+    [SerializeField] private const float endDelay = 3f;
+    [SerializeField] private CameraControl cameraControl = null;
+    [SerializeField] private Text MessageText = null;
+    [SerializeField] private GameObject tankPrefab = null;
+    [SerializeField] private GameObject healthPackPrefab = null;
+    [SerializeField] private HealthPack healthPackScript = null;
+    [SerializeField] private TankManager[] tanks = null;
 
     private void Start()
     {
-        m_StartWait = new WaitForSeconds(m_StartDelay);
-        m_EndWait = new WaitForSeconds(m_EndDelay);
+        startWait = new WaitForSeconds(StartDelay);
+        endWait = new WaitForSeconds(EndDelay);
 
         SpawnAllTanks();
         SetCameraTargets();
@@ -39,31 +37,27 @@ public class GameManager : MonoBehaviour
         StartCoroutine(GameLoop());
     }
 
-
     private void SpawnAllTanks()
     {
-        for (int i = 0; i < m_Tanks.Length; i++)
+        for (int i = 0; i < tanks.Length; i++)
         {
-            m_Tanks[i].m_Instance =
-                Instantiate(m_TankPrefab, m_Tanks[i].m_SpawnPoint.position, m_Tanks[i].m_SpawnPoint.rotation) as GameObject;
-            m_Tanks[i].m_PlayerNumber = i + 1;
-            m_Tanks[i].Setup();
+            tanks[i].instance =
+                Instantiate(tankPrefab, tanks[i].spawnPoint.position, tanks[i].spawnPoint.rotation) as GameObject;
+            tanks[i].playerNumber = i + 1;
+            tanks[i].Setup();
         }
     }
-
 
     private void SetCameraTargets()
     {
-        Transform[] targets = new Transform[m_Tanks.Length];
+        Transform[] targets = new Transform[tanks.Length];
 
         for (int i = 0; i < targets.Length; i++)
         {
-            targets[i] = m_Tanks[i].m_Instance.transform;
+            targets[i] = tanks[i].instance.transform;
         }
-
-        m_CameraControl.m_Targets = targets;
+        cameraControl.targets = targets;
     }
-
 
     private IEnumerator GameLoop()
     {
@@ -71,7 +65,7 @@ public class GameManager : MonoBehaviour
         yield return StartCoroutine(RoundPlaying());
         yield return StartCoroutine(RoundEnding());
 
-        if (m_GameWinner != null)
+        if (gameWinner != null)
         {
             SceneManager.LoadScene(0);
         }
@@ -81,39 +75,34 @@ public class GameManager : MonoBehaviour
         }
     }
 
-
     private IEnumerator RoundStarting()
     {
         ResetAllTanks();
         DisableTankControl();
 
-        m_CameraControl.SetStartPositionAndSize();
+        cameraControl.SetStartPositionAndSize();
 
-        m_RoundNumber++;
-        m_MessageText.text = "Round " + m_RoundNumber;
+        roundNumber++;
+        messageText.text = "Round " + roundNumber;
 
-        yield return m_StartWait;
+        yield return startWait;
     }
-
 
     private IEnumerator RoundPlaying()
     {
         EnableTankControl();
 
-        m_MessageText.text = string.Empty;
+        messageText.text = string.Empty;
       
-
         while (!OneTankLeft())
         {
-            healthPacks = GameObject.FindGameObjectsWithTag("HealthPack");
-            if (healthPacks.Length == 0)
+            if(!shellInstance.activeSelf)
             {
                 SpawnHealthPack();
             }
             yield return null;
         }
     }
-
 
     private IEnumerator RoundEnding()
     {
@@ -126,129 +115,121 @@ public class GameManager : MonoBehaviour
             Destroy(weapon);
         }
 
-        m_RoundWinner = null;
+        roundWinner = null;
 
-        m_RoundWinner = GetRoundWinner();
+        roundWinner = GetRoundWinner();
 
-        if (m_RoundWinner != null)
+        if (roundWinner != null)
         {
-            m_RoundWinner.m_Wins++;
+            roundWinner.Wins++;
         }
 
-        m_GameWinner = GetGameWinner();
+        gameWinner = GetGameWinner();
 
         string message = EndMessage();
-        m_MessageText.text = message;
+        messageText.text = message;
 
         weapons = null;
 
-        yield return m_EndWait;
+        yield return endWait;
     }
-
 
     private bool OneTankLeft()
     {
         int numTanksLeft = 0;
 
-        for (int i = 0; i < m_Tanks.Length; i++)
+        for (int i = 0; i < tanks.Length; i++)
         {
-            if (m_Tanks[i].m_Instance.activeSelf)
+            if (tanks[i].instance.activeSelf)
                 numTanksLeft++;
         }
 
         return numTanksLeft <= 1;
     }
 
-
     private TankManager GetRoundWinner()
     {
-        for (int i = 0; i < m_Tanks.Length; i++)
+        for (int i = 0; i < tanks.Length; i++)
         {
-            if (m_Tanks[i].m_Instance.activeSelf)
-                return m_Tanks[i];
+            if (tanks[i].instance.activeSelf)
+                return tanks[i];
         }
 
         return null;
     }
-
 
     private TankManager GetGameWinner()
     {
-        for (int i = 0; i < m_Tanks.Length; i++)
+        for (int i = 0; i < tanks.Length; i++)
         {
-            if (m_Tanks[i].m_Wins == m_NumRoundsToWin)
-                return m_Tanks[i];
+            if (tanks[i].wins == numRoundsToWin)
+                return tanks[i];
         }
 
         return null;
     }
-
 
     private string EndMessage()
     {
         string message = "DRAW!";
 
-        if (m_RoundWinner != null)
-            message = m_RoundWinner.m_ColoredPlayerText + " WINS THE ROUND!";
+        if (roundWinner != null)
+            message = roundWinner.coloredPlayerText + " WINS THE ROUND!";
 
         message += "\n\n\n\n";
 
-        for (int i = 0; i < m_Tanks.Length; i++)
+        for (int i = 0; i < tanks.Length; i++)
         {
-            message += m_Tanks[i].m_ColoredPlayerText + ": " + m_Tanks[i].m_Wins + " WINS\n";
+            message += tanks[i].coloredPlayerText + ": " + tanks[i].wins + " WINS\n";
         }
 
-        if (m_GameWinner != null)
-            message = m_GameWinner.m_ColoredPlayerText + " WINS THE GAME!";
+        if (gameWinner != null)
+            message = gameWinner.coloredPlayerText + " WINS THE GAME!";
 
         return message;
     }
 
-
     private void ResetAllTanks()
     {
-        for (int i = 0; i < m_Tanks.Length; i++)
+        for (int i = 0; i < tanks.Length; i++)
         {
-            m_Tanks[i].Reset();
+            tanks[i].Reset();
         }
     }
-
 
     private void EnableTankControl()
     {
-        for (int i = 0; i < m_Tanks.Length; i++)
+        for (int i = 0; i < tanks.Length; i++)
         {
-            m_Tanks[i].EnableControl();
+            tanks[i].EnableControl();
         }
     }
 
-
     private void DisableTankControl()
     {
-        for (int i = 0; i < m_Tanks.Length; i++)
+        for (int i = 0; i < tanks.Length; i++)
         {
-            m_Tanks[i].DisableControl();
+            tanks[i].DisableControl();
         }
     }
 
     private void SpawnHealthPack()
     {
-        h_healthPackSpawnPoint = rnd.Next(1, 5);
-        switch (h_healthPackSpawnPoint)
+        healthPackSpawnPoint = rnd.Next(1, 5);
+        switch (healthPackSpawnPoint)
         {
             case 1:
-                GameObject shellInstanceOne = Instantiate(h_healthPackPrefab, h_healthPackScript.h_spawnPointOne.position, h_healthPackScript.h_spawnPointOne.rotation) as GameObject;
+                shellInstance = Instantiate(healthPackPrefab, healthPackScript.spawnPointOne.position, healthPackScript.spawnPointOne.rotation);
                 break;
             case 2:
-                GameObject shellInstanceTwo = Instantiate(h_healthPackPrefab, h_healthPackScript.h_spawnPointTwo.position, h_healthPackScript.h_spawnPointTwo.rotation) as GameObject;
+                shellInstance = Instantiate(healthPackPrefab, healthPackScript.spawnPointTwo.position, healthPackScript.spawnPointTwo.rotation);
                 break;
             case 3:
-                GameObject shellInstanceThree = Instantiate(h_healthPackPrefab, h_healthPackScript.h_spawnPointThree.position, h_healthPackScript.h_spawnPointThree.rotation) as GameObject;
+                shellInstance = Instantiate(healthPackPrefab, healthPackScript.spawnPointThree.position, healthPackScript.spawnPointThree.rotation);
                 break;
             case 4:
-                GameObject shellInstanceFour = Instantiate(h_healthPackPrefab, h_healthPackScript.h_spawnPointFour.position, h_healthPackScript.h_spawnPointFour.rotation) as GameObject;
+                shellInstance= Instantiate(healthPackPrefab, healthPackScript.spawnPointFour.position, healthPackScript.spawnPointFour.rotation);
                 break;
         }
-
     }
 }
