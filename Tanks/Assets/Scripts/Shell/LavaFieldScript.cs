@@ -4,20 +4,18 @@ using UnityEngine;
 
 public class LavaFieldScript : MonoBehaviour
 {
-    // Start is called before the first frame update
-    public float m_LifeTime = 3f;
-    public LayerMask m_TankMask;
 
-    void Start()
+    [SerializeField] private const float lifeTime = 3f;
+    [SerializeField] private LayerMask tankMask;
+
+    private void Start()
     {
         Destroy(gameObject, 3f);
     }
 
     private void OnTriggerStay(Collider other)
     {
-        // Find all the tanks in an area around the shell and damage them.
-        
-        Collider[] colliders = Physics.OverlapSphere(transform.position, 15f, m_TankMask);
+        Collider[] colliders = Physics.OverlapSphere(transform.position, 15f, tankMask);
 
         for (int i = 0; i < colliders.Length; i++)
         {
@@ -36,5 +34,4 @@ public class LavaFieldScript : MonoBehaviour
             targetHealth.TakeDamage(damage);
         }
     }
-
 }

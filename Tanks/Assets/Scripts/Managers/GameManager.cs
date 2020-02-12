@@ -5,8 +5,8 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    private int roundNumber = null;
-    private int healthPackSpawnPoint = null;
+    private int roundNumber = 0;
+    private int healthPackSpawnPoint = 0;
     private WaitForSeconds startWait = null;     
     private WaitForSeconds endWait = null;       
     private TankManager roundWinner = null;
@@ -20,7 +20,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private const float startDelay = 3f;
     [SerializeField] private const float endDelay = 3f;
     [SerializeField] private CameraControl cameraControl = null;
-    [SerializeField] private Text MessageText = null;
+    [SerializeField] private Text messageText = null;
     [SerializeField] private GameObject tankPrefab = null;
     [SerializeField] private GameObject healthPackPrefab = null;
     [SerializeField] private HealthPack healthPackScript = null;
@@ -28,8 +28,8 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        startWait = new WaitForSeconds(StartDelay);
-        endWait = new WaitForSeconds(EndDelay);
+        startWait = new WaitForSeconds(startDelay);
+        endWait = new WaitForSeconds(endDelay);
 
         SpawnAllTanks();
         SetCameraTargets();
@@ -96,7 +96,7 @@ public class GameManager : MonoBehaviour
       
         while (!OneTankLeft())
         {
-            if(!shellInstance.activeSelf)
+            if(shellInstance == null || !shellInstance.activeSelf)
             {
                 SpawnHealthPack();
             }
@@ -121,7 +121,7 @@ public class GameManager : MonoBehaviour
 
         if (roundWinner != null)
         {
-            roundWinner.Wins++;
+            roundWinner.wins++;
         }
 
         gameWinner = GetGameWinner();
