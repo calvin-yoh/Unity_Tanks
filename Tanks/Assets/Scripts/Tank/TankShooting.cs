@@ -3,125 +3,110 @@ using UnityEngine.UI;
 
 public class TankShooting : MonoBehaviour
 {
-    public int m_PlayerNumber = 1;       
-    public Rigidbody m_ShellOne;
-    public Rigidbody m_ShellTwo;
-    public Rigidbody m_ShellThree;
-    public Transform m_FireTransform;
-    public Transform m_MineTransform;
-    public Slider m_AimSlider;           
-    public AudioSource m_ShootingAudio;  
-    public AudioClip m_ChargingClip;     
-    public AudioClip m_FireClip;
+    public int playerNumber = 1;       
+    public Rigidbody shellOne = null;
+    public Rigidbody shellTwo = null;
+    public Rigidbody shellThree = null;
+    public Transform fireTransform = null;
+    public Transform mineTransform = null;
+    public Slider aimSlider = null;           
+    public AudioSource shootingAudio = null;  
+    public AudioClip chargingClip = null;     
+    public AudioClip fireClip = null;
    
-    public float m_MinLaunchForce = 15f; 
-    public float m_MaxLaunchForce = 30f; 
-    public float m_MaxChargeTime = 0.75f;
+    public float minLaunchForce = 15f; 
+    public float maxLaunchForce = 30f; 
+    public float maxChargeTime = 0.75f;
 
-    
-    private string m_FireButton;         
-    private float m_CurrentLaunchForce;  
-    private float m_ChargeSpeed;         
-    private bool m_Fired;
-    private int m_shellToFire = 1;
-
-
+    private string fireButton;         
+    private float currentLaunchForce;  
+    private float chargeSpeed;         
+    private bool fired;
+    private int shellToFire = 1;
 
     private void OnEnable()
     {
-        m_CurrentLaunchForce = m_MinLaunchForce;
-        m_AimSlider.value = m_MinLaunchForce;
+        currentLaunchForce = minLaunchForce;
+        aimSlider.value = minLaunchForce;
     }
-
 
     private void Start()
     {
-        m_FireButton = "Fire" + m_PlayerNumber;
+        fireButton = "Fire" + playerNumber;
 
-        m_ChargeSpeed = (m_MaxLaunchForce - m_MinLaunchForce) / m_MaxChargeTime;
+        chargeSpeed = (maxLaunchForce - minLaunchForce) / maxChargeTime;
     }
     
-
     private void Update()
     {
         // Track the current state of the fire button and make decisions based on the current launch force.
-        m_AimSlider.value = m_MinLaunchForce;
+        aimSlider.value = minLaunchForce;
 
-        if (m_CurrentLaunchForce >= m_MaxLaunchForce && !m_Fired)
+        if (currentLaunchForce >= maxLaunchForce && !fired)
         {
             // at max charge, not yet fired
-            m_CurrentLaunchForce = m_MaxLaunchForce;
+            currentLaunchForce = maxLaunchForce;
             Fire();
         }
-        else if (Input.GetButtonDown(m_FireButton))
+        else if (Input.GetButtonDown(fireButton))
         {
             // have we pressed fire for the first time?
-            m_Fired = false;
-            m_CurrentLaunchForce = m_MinLaunchForce;
+            fired = false;
+            currentLaunchForce = minLaunchForce;
 
-            m_ShootingAudio.clip = m_ChargingClip;
-            m_ShootingAudio.Play();
+            shootingAudio.clip = chargingClip;
+            shootingAudio.Play();
         }
-        else if (Input.GetButton(m_FireButton) && !m_Fired)
+        else if (Input.GetButton(fireButton) && !fired)
         {
             // Holding the fire button, having not yet fired
-            m_CurrentLaunchForce += m_ChargeSpeed * Time.deltaTime;
+            currentLaunchForce += chargeSpeed * Time.deltaTime;
 
-            m_AimSlider.value = m_CurrentLaunchForce;
+            aimSlider.value = currentLaunchForce;
         }
-        else if (Input.GetButtonUp(m_FireButton) && !m_Fired)
+        else if (Input.GetButtonUp(fireButton) && !fired)
         {
             //we released the button, having not fired yet
             Fire();
         }
-        
-        // Check with weapon is currently selected
-
-
     }
-
 
     private void Fire()
     {
-        // Instantiate and launch the shell.
-        
-        m_Fired = true;
+        fired = true;
 
-        if (m_shellToFire == 1)
+        if (shellToFire == 1)
         {
-            Rigidbody shellInstance = Instantiate(m_ShellOne, m_FireTransform.position, m_FireTransform.rotation) as Rigidbody;
-            shellInstance.velocity = m_CurrentLaunchForce * m_FireTransform.forward;
+            Rigidbody shellInstance = Instantiate(shellOne, fireTransform.position, fireTransform.rotation);
+            shellInstance.velocity = currentLaunchForce * fireTransform.forward;
 
-            m_ShootingAudio.clip = m_FireClip;
-            m_ShootingAudio.Play();
+            shootingAudio.clip = fireClip;
+            shootingAudio.Play();
 
-            m_CurrentLaunchForce = m_MinLaunchForce;
-            m_shellToFire++;
+            currentLaunchForce = minLaunchForce;
+            shellToFire++;
         }
-        else if (m_shellToFire == 2)
+        else if (shellToFire == 2)
         {
-            Rigidbody shellInstance = Instantiate(m_ShellTwo, m_FireTransform.position, m_FireTransform.rotation) as Rigidbody;
-            shellInstance.velocity = m_CurrentLaunchForce * m_FireTransform.forward;
+            Rigidbody shellInstance = Instantiate(shellTwo, fireTransform.position, fireTransform.rotation);
+            shellInstance.velocity = currentLaunchForce * fireTransform.forward;
 
-            m_ShootingAudio.clip = m_FireClip;
-            m_ShootingAudio.Play();
+            shootingAudio.clip = fireClip;
+            shootingAudio.Play();
 
-            m_CurrentLaunchForce = m_MinLaunchForce;
-            m_shellToFire++;
+            currentLaunchForce = minLaunchForce;
+            shellToFire++;
         }
-        else if (m_shellToFire == 3)
+        else if (shellToFire == 3)
         {
-            Rigidbody shellInstance = Instantiate(m_ShellThree, m_MineTransform.position, m_MineTransform.rotation) as Rigidbody;
+            Rigidbody shellInstance = Instantiate(shellThree, mineTransform.position, mineTransform.rotation);
 
-            m_ShootingAudio.clip = m_FireClip;
-            m_ShootingAudio.Play();
+            shootingAudio.clip = fireClip;
+            shootingAudio.Play();
 
-            m_CurrentLaunchForce = m_MinLaunchForce;
+            currentLaunchForce = minLaunchForce;
 
-            m_shellToFire = 1; ;
+            shellToFire = 1; ;
         }
-
-
-
     }
 }

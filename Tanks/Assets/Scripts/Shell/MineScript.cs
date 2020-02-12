@@ -4,24 +4,21 @@ using UnityEngine;
 
 public class MineScript : MonoBehaviour
 {
-    public LayerMask m_TankMask;
-    public ParticleSystem m_ExplosionParticles;
-    public AudioSource m_ExplosionAudio;
-    public float m_ExplosionForce = 1000f;
-    public float m_MaxLifeTime = 30f;
-    public float m_ExplosionRadius = 5f;
-
+    public LayerMask tankMask;
+    public ParticleSystem explosionParticles;
+    public AudioSource explosionAudio;
+    public float explosionForce = 1000f;
+    public float maxLifeTime = 30f;
+    public float explosionRadius = 5f;
 
     private void Start()
     {
-        Destroy(gameObject, m_MaxLifeTime);
+        Destroy(gameObject, maxLifeTime);
     }
-
 
     private void OnTriggerEnter(Collider other)
     {
-        // Find all the tanks in an area around the shell and damage them.
-        Collider[] colliders = Physics.OverlapSphere(transform.position, m_ExplosionRadius, m_TankMask);
+        Collider[] colliders = Physics.OverlapSphere(transform.position, explosionRadius, tankMask);
 
         for (int i = 0; i < colliders.Length; i++)
         {
@@ -29,7 +26,7 @@ public class MineScript : MonoBehaviour
             if (!targetRigidbody)
                 continue;
 
-            targetRigidbody.AddExplosionForce(m_ExplosionForce, transform.position, m_ExplosionRadius);
+            targetRigidbody.AddExplosionForce(explosionForce, transform.position, explosionRadius);
 
             TankHealth targetHealth = targetRigidbody.GetComponent<TankHealth>();
 
@@ -40,16 +37,14 @@ public class MineScript : MonoBehaviour
 
             targetHealth.TakeDamage(damage);
 
-            m_ExplosionParticles.transform.parent = null;
+            explosionParticles.transform.parent = null;
 
-            m_ExplosionParticles.Play();
+            explosionParticles.Play();
 
-            m_ExplosionAudio.Play();
+            explosionAudio.Play();
 
-            Destroy(m_ExplosionParticles.gameObject, m_ExplosionParticles.duration);
+            Destroy(explosionParticles.gameObject, explosionParticles.duration);
             Destroy(gameObject);
-
         }
-
     }
 }

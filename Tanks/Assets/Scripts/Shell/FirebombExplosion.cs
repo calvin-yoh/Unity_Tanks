@@ -4,38 +4,30 @@ using UnityEngine;
 
 public class FirebombExplosion : MonoBehaviour
 {
-    public LayerMask m_GroundMask;
-    public ParticleSystem m_ExplosionParticles;
-    public AudioSource m_ExplosionAudio;
-    public float m_MaxLifeTime = 2f;
-    public Transform m_Lavafield;
-    //public FireTiles m_fireTiles;
-
-
+    public LayerMask groundMask;
+    public ParticleSystem explosionParticles = null;
+    public AudioSource explosionAudio = null;
+    public float maxLifeTime = 2f;
+    public Transform lavafield = null;
 
     private void Start()
     {
-        Destroy(gameObject, m_MaxLifeTime);
+        Destroy(gameObject, maxLifeTime);
     }
-
 
     private void OnTriggerEnter(Collider other)
     {
-        // Find all the tanks in an area around the shell and damage them.
-
         if (!other.GetComponent<Rigidbody>())
         {
+            Instantiate(lavafield, transform.position, Quaternion.identity);
+            explosionParticles.transform.parent = null;
 
-            Instantiate(m_Lavafield, transform.position, Quaternion.identity);
-            m_ExplosionParticles.transform.parent = null;
+            explosionParticles.Play();
 
-            m_ExplosionParticles.Play();
+            explosionAudio.Play();
 
-            m_ExplosionAudio.Play();
-
-            Destroy(m_ExplosionParticles.gameObject, m_ExplosionParticles.duration);
+            Destroy(explosionParticles.gameObject, explosionParticles.duration);
             Destroy(gameObject);
         }
     }
-
 }
