@@ -4,14 +4,18 @@ using UnityEngine;
 
 public class FirebombExplosion : MonoBehaviour
 {
-    public LayerMask groundMask;
-    public ParticleSystem explosionParticles = null;
-    public AudioSource explosionAudio = null;
-    public float maxLifeTime = 2f;
-    public Transform lavafield = null;
+    [SerializeField] private LayerMask groundMask;
+    [SerializeField] private ParticleSystem explosionParticles = null;
+    [SerializeField] private AudioSource explosionAudio = null;
+    [SerializeField] private const float maxLifeTime = 2f;
+    [SerializeField] private GameObject lavafield = null;
+    [SerializeField] private GameObject instance = null;
+
+    private TankShooting shootingScript = null;
 
     private void Start()
     {
+        shootingScript = instance.GetComponent<TankShooting>();
         Destroy(gameObject, maxLifeTime);
     }
 
@@ -19,14 +23,18 @@ public class FirebombExplosion : MonoBehaviour
     {
         if (!other.GetComponent<Rigidbody>())
         {
-            Instantiate(lavafield, transform.position, Quaternion.identity);
+            GameObject shellInstance = Instantiate(lavafield, transform.position, Quaternion.identity);
+            
+            shootingScript.weaponsDict.Add(shootingScript.ReturnWeaponNumber(), shellInstance);
+            shootingScript.AddOneToWeaponNumber();
+
             explosionParticles.transform.parent = null;
 
             explosionParticles.Play();
 
             explosionAudio.Play();
 
-            Destroy(explosionParticles.gameObject, explosionParticles.duration);
+            Destroy(explosionParticles.gameObject, explosionParticles.main.duration);
             Destroy(gameObject);
         }
     }

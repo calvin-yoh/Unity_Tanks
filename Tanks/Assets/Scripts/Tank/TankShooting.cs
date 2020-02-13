@@ -1,19 +1,22 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class TankShooting : MonoBehaviour
 {
     public int playerNumber = 1;       
-    public Rigidbody shellOne = null;
-    public Rigidbody shellTwo = null;
-    public Rigidbody shellThree = null;
+    public GameObject shellOne = null;
+    public GameObject shellTwo = null;
+    public GameObject shellThree = null;
     public Transform fireTransform = null;
     public Transform mineTransform = null;
     public Slider aimSlider = null;           
     public AudioSource shootingAudio = null;  
     public AudioClip chargingClip = null;     
     public AudioClip fireClip = null;
-   
+    public Dictionary<float, GameObject> weaponsDict = new Dictionary<float, GameObject>();
+    public static float weaponNumber = 0;
+
     public float minLaunchForce = 15f; 
     public float maxLaunchForce = 30f; 
     public float maxChargeTime = 0.75f;
@@ -77,8 +80,8 @@ public class TankShooting : MonoBehaviour
 
         if (shellToFire == 1)
         {
-            Rigidbody shellInstance = Instantiate(shellOne, fireTransform.position, fireTransform.rotation);
-            shellInstance.velocity = currentLaunchForce * fireTransform.forward;
+            GameObject shellInstance = Instantiate(shellOne, fireTransform.position, fireTransform.rotation);
+            shellInstance.GetComponent<Rigidbody>().velocity = currentLaunchForce * fireTransform.forward;
 
             shootingAudio.clip = fireClip;
             shootingAudio.Play();
@@ -88,8 +91,8 @@ public class TankShooting : MonoBehaviour
         }
         else if (shellToFire == 2)
         {
-            Rigidbody shellInstance = Instantiate(shellTwo, fireTransform.position, fireTransform.rotation);
-            shellInstance.velocity = currentLaunchForce * fireTransform.forward;
+            GameObject shellInstance = Instantiate(shellTwo, fireTransform.position, fireTransform.rotation);
+            shellInstance.GetComponent<Rigidbody>().velocity = currentLaunchForce * fireTransform.forward;
 
             shootingAudio.clip = fireClip;
             shootingAudio.Play();
@@ -99,7 +102,7 @@ public class TankShooting : MonoBehaviour
         }
         else if (shellToFire == 3)
         {
-            Rigidbody shellInstance = Instantiate(shellThree, mineTransform.position, mineTransform.rotation);
+            GameObject shellInstance = Instantiate(shellThree, mineTransform.position, mineTransform.rotation);
 
             shootingAudio.clip = fireClip;
             shootingAudio.Play();
@@ -108,5 +111,25 @@ public class TankShooting : MonoBehaviour
 
             shellToFire = 1; ;
         }
+    }
+
+    public void AddOneToWeaponNumber()
+    {
+        weaponNumber++;
+    }
+
+    public float ReturnWeaponNumber()
+    {
+        return weaponNumber;
+    }
+
+    public void ResetWeaponNumber()
+    {
+        weaponNumber = 0;
+    }
+
+    public void ResetWeaponDictionary()
+    {
+        weaponsDict.Clear();
     }
 }

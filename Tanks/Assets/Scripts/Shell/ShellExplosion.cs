@@ -2,13 +2,13 @@
 
 public class ShellExplosion : MonoBehaviour
 {
-    public LayerMask tankMask;
-    public ParticleSystem explosionParticles;       
-    public AudioSource explosionAudio;              
-    public float maxDamage = 100f;                  
-    public float explosionForce = 1000f;            
-    public float maxLifeTime = 2f;                  
-    public float explosionRadius = 5f;              
+    [SerializeField] private LayerMask tankMask;
+    [SerializeField] private ParticleSystem explosionParticles;
+    [SerializeField] private AudioSource explosionAudio;
+    [SerializeField] private const float maxDamage = 100f;
+    [SerializeField] private const float explosionForce = 1000f;
+    [SerializeField] private const float maxLifeTime = 2f;
+    [SerializeField] private const float explosionRadius = 5f;              
 
     private void Start()
     {
@@ -23,28 +23,25 @@ public class ShellExplosion : MonoBehaviour
         for (int i = 0; i < colliders.Length; i++)
         {
             Rigidbody targetRigidbody = colliders[i].GetComponent<Rigidbody>();
-            if (!targetRigidbody)
-                continue;
+            if (targetRigidbody.tag == "TankPlayers")
+            {
+                targetRigidbody.AddExplosionForce(explosionForce, transform.position, explosionRadius);
 
-            targetRigidbody.AddExplosionForce(explosionForce, transform.position, explosionRadius);
+                TankHealth targetHealth = targetRigidbody.GetComponent<TankHealth>();
 
-            TankHealth targetHealth = targetRigidbody.GetComponent<TankHealth>();
+                float damage = CalculateDamage(targetRigidbody.position);
 
-            if (!targetHealth)
-                continue;
+                targetHealth.TakeDamage(damage);
 
-            float damage = CalculateDamage(targetRigidbody.position);
+                explosionParticles.transform.parent = null;
 
-            targetHealth.TakeDamage(damage);
+                explosionParticles.Play();
 
-            explosionParticles.transform.parent = null;
+                explosionAudio.Play();
 
-            explosionParticles.Play();
-
-            explosionAudio.Play();
-
-            Destroy(explosionParticles.gameObject, explosionParticles.duration);
-            Destroy(gameObject);    
+                Destroy(explosionParticles.gameObject, explosionParticles.main.duration);
+                Destroy(gameObject);
+            }
         }
     }
 
