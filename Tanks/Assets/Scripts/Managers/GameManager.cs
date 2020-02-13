@@ -2,6 +2,7 @@
 using System.Collections;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
 {
@@ -15,10 +16,15 @@ public class GameManager : MonoBehaviour
     private GameObject[] healthPacks = null;
     private System.Random rnd = new System.Random();
     private GameObject shellInstance = null;
+    private TankShooting shootingScript = null;
 
     [SerializeField] private const int numRoundsToWin = 5;
-    [SerializeField] private const float startDelay = 3f;
-    [SerializeField] private const float endDelay = 3f;
+    [SerializeField] private float startTimer = 3f;
+    [SerializeField] private float endTimer = 3f;
+    [SerializeField] private float baseTimer = 3f;
+    [SerializeField] private float gameWinTimer = 3f;
+    [SerializeField] private GameObject tankScriptHolder = null;
+
     [SerializeField] private CameraControl cameraControl = null;
     [SerializeField] private Text messageText = null;
     [SerializeField] private GameObject tankPrefab = null;
@@ -28,13 +34,52 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        startWait = new WaitForSeconds(startDelay);
-        endWait = new WaitForSeconds(endDelay);
-
+        shootingScript = tankScriptHolder.GetComponent<TankShooting>();
         SpawnAllTanks();
         SetCameraTargets();
+    }
 
-        StartCoroutine(GameLoop());
+    private void Update()
+    {
+        if (startTimer == baseTimer)
+        {
+            RoundStarting();
+            startTimer -= Time.deltaTime;
+        }
+        else if (startTimer >= 0)
+        {
+            startTimer -= Time.deltaTime;
+        }          
+        else if (OneTankLeft())
+        {
+            if (endTimer == baseTimer)
+            {
+                RoundEnding();
+                endTimer -= Time.deltaTime;
+            }
+            else if (endTimer >= 0)
+            {
+                endTimer -= Time.deltaTime;
+            }
+            else if (endTimer < 0)
+            {
+                startTimer = baseTimer;
+                endTimer = baseTimer;
+            }
+        }
+        else 
+        {
+            RoundPlaying();        
+        }
+
+        if (gameWinner != null && gameWinTimer < 0)
+        {
+            SceneManager.LoadScene(0);
+        }
+        else if(gameWinner != null)
+        {
+            gameWinTimer -= Time.deltaTime;
+        }
     }
 
     private void SpawnAllTanks()
@@ -59,23 +104,7 @@ public class GameManager : MonoBehaviour
         cameraControl.targets = targets;
     }
 
-    private IEnumerator GameLoop()
-    {
-        yield return StartCoroutine(RoundStarting());
-        yield return StartCoroutine(RoundPlaying());
-        yield return StartCoroutine(RoundEnding());
-
-        if (gameWinner != null)
-        {
-            SceneManager.LoadScene(0);
-        }
-        else
-        {
-            StartCoroutine(GameLoop());
-        }
-    }
-
-    private IEnumerator RoundStarting()
+    private void RoundStarting()
     {
         ResetAllTanks();
         DisableTankControl();
@@ -84,36 +113,36 @@ public class GameManager : MonoBehaviour
 
         roundNumber++;
         messageText.text = "Round " + roundNumber;
-
-        yield return startWait;
     }
 
-    private IEnumerator RoundPlaying()
+    private void RoundPlaying()
     {
         EnableTankControl();
 
         messageText.text = string.Empty;
       
-        while (!OneTankLeft())
+        if(!OneTankLeft())
         {
             if(shellInstance == null || !shellInstance.activeSelf)
             {
                 SpawnHealthPack();
             }
-            yield return null;
         }
     }
 
-    private IEnumerator RoundEnding()
+    private void RoundEnding()
     {
         DisableTankControl();
 
         //removes all weapons types still on field; Mines, LavaFields
-        weapons = GameObject.FindGameObjectsWithTag("Weapons");
-        foreach (GameObject weapon in weapons)
+        foreach (KeyValuePair<float, GameObject> kvp in shootingScript.weaponsDict)
         {
-            Destroy(weapon);
+            Debug.Log(kvp.Key);
+            Debug.Log(kvp.Value);
+            Destroy(kvp.Value);
         }
+        shootingScript.ResetWeaponNumber();
+        shootingScript.ResetWeaponDictionary();
 
         roundWinner = null;
 
@@ -130,8 +159,6 @@ public class GameManager : MonoBehaviour
         messageText.text = message;
 
         weapons = null;
-
-        yield return endWait;
     }
 
     private bool OneTankLeft()
@@ -154,7 +181,6 @@ public class GameManager : MonoBehaviour
             if (tanks[i].instance.activeSelf)
                 return tanks[i];
         }
-
         return null;
     }
 
@@ -165,7 +191,6 @@ public class GameManager : MonoBehaviour
             if (tanks[i].wins == numRoundsToWin)
                 return tanks[i];
         }
-
         return null;
     }
 

@@ -2,20 +2,21 @@
 
 public class TankMovement : MonoBehaviour
 {
-    public int playerNumber = 1;         
-    public float speed = 12f;            
-    public float turnSpeed = 180f;       
-    public AudioSource movementAudio = null;    
-    public AudioClip engineIdling = null;       
-    public AudioClip engineDriving = null;      
-    public float pitchRange = 0.2f;
+    public int playerNumber = 1;
 
     private string movementAxisName = null;     
     private string turnAxisName = null;         
-    private Rigidbody rigidbody = null;         
+    private new Rigidbody rigidbody = null;         
     private float movementInputValue = 0;    
     private float turnInputValue = 0;        
-    private float originalPitch = 0;         
+    private float originalPitch = 0;
+
+    [SerializeField] private const float speed = 12f;
+    [SerializeField] private const float turnSpeed = 180f;
+    [SerializeField] private AudioSource movementAudio = null;
+    [SerializeField] private AudioClip engineIdling = null;
+    [SerializeField] private AudioClip engineDriving = null;
+    [SerializeField] private const float pitchRange = 0.2f;
 
     private void Awake()
     {

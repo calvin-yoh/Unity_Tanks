@@ -4,15 +4,21 @@ using UnityEngine;
 
 public class MineScript : MonoBehaviour
 {
-    public LayerMask tankMask;
-    public ParticleSystem explosionParticles;
-    public AudioSource explosionAudio;
-    public float explosionForce = 1000f;
-    public float maxLifeTime = 30f;
-    public float explosionRadius = 5f;
+    [SerializeField] private LayerMask tankMask;
+    [SerializeField] private ParticleSystem explosionParticles;
+    [SerializeField] private AudioSource explosionAudio;
+    [SerializeField] private float explosionForce = 1000f;
+    [SerializeField] private float maxLifeTime = 30f;
+    [SerializeField] private float explosionRadius = 2f;
+    [SerializeField] private GameObject tankScriptReference = null;
+
+    private TankShooting shootingScript = null;
 
     private void Start()
     {
+        shootingScript = tankScriptReference.GetComponent<TankShooting>();
+        shootingScript.weaponsDict.Add(shootingScript.ReturnWeaponNumber(), gameObject);
+        shootingScript.AddOneToWeaponNumber();
         Destroy(gameObject, maxLifeTime);
     }
 
@@ -23,28 +29,25 @@ public class MineScript : MonoBehaviour
         for (int i = 0; i < colliders.Length; i++)
         {
             Rigidbody targetRigidbody = colliders[i].GetComponent<Rigidbody>();
-            if (!targetRigidbody)
-                continue;
+            if (targetRigidbody.tag == "TankPlayers")
+            {
+                targetRigidbody.AddExplosionForce(explosionForce, transform.position, explosionRadius);
 
-            targetRigidbody.AddExplosionForce(explosionForce, transform.position, explosionRadius);
+                TankHealth targetHealth = targetRigidbody.GetComponent<TankHealth>();
 
-            TankHealth targetHealth = targetRigidbody.GetComponent<TankHealth>();
+                float damage = 30f;
 
-            if (!targetHealth)
-                continue;
+                targetHealth.TakeDamage(damage);
 
-            float damage = 30f;
+                explosionParticles.transform.parent = null;
 
-            targetHealth.TakeDamage(damage);
+                explosionParticles.Play();
 
-            explosionParticles.transform.parent = null;
+                explosionAudio.Play();
 
-            explosionParticles.Play();
-
-            explosionAudio.Play();
-
-            Destroy(explosionParticles.gameObject, explosionParticles.duration);
-            Destroy(gameObject);
+                Destroy(explosionParticles.gameObject, explosionParticles.main.duration);
+                Destroy(gameObject);
+            }
         }
     }
 }

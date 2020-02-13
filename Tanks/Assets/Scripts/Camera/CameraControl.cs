@@ -2,12 +2,12 @@
 
 public class CameraControl : MonoBehaviour
 {
-    public float dampTime = 0.2f;                 
-    public float screenEdgeBuffer = 4f;           
-    public float minSize = 6.5f;                  
+    [SerializeField] private const float dampTime = 0.2f;
+    [SerializeField] private const float screenEdgeBuffer = 4f;
+    [SerializeField] private const float minSize = 6.5f;                  
     [HideInInspector] public Transform[] targets; 
 
-    private Camera camera = null;                        
+    private new Camera camera = null;                        
     private float zoomSpeed = 0;
     private Vector3 moveVelocity;
     private Vector3 desiredPosition;             
