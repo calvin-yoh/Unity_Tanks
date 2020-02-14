@@ -9,8 +9,8 @@ public class CameraControl : MonoBehaviour
 
     private new Camera camera = null;                        
     private float zoomSpeed = 0;
-    private Vector3 moveVelocity;
-    private Vector3 desiredPosition;             
+    private Vector3 moveVelocity = new Vector3(0.0f, 0.0f, 0.0f);
+    private Vector3 desiredPosition = new Vector3(0.0f, 0.0f, 0.0f);
 
     private void Awake()
     {
@@ -37,11 +37,11 @@ public class CameraControl : MonoBehaviour
 
         for (int i = 0; i < targets.Length; i++)
         {
-            if (!targets[i].gameObject.activeSelf)
-                continue;
-
-            averagePos += targets[i].position;
-            numTargets++;
+            if (targets[i].gameObject.activeSelf)
+            {
+                averagePos += targets[i].position;
+                numTargets++;
+            }   
         }
 
         if (numTargets > 0)
@@ -67,15 +67,15 @@ public class CameraControl : MonoBehaviour
         for (int i = 0; i < targets.Length; i++)
         {
             if (!targets[i].gameObject.activeSelf)
-                continue;
+            {
+                Vector3 targetLocalPos = transform.InverseTransformPoint(targets[i].position);
 
-            Vector3 targetLocalPos = transform.InverseTransformPoint(targets[i].position);
+                Vector3 desiredPosToTarget = targetLocalPos - desiredLocalPos;
 
-            Vector3 desiredPosToTarget = targetLocalPos - desiredLocalPos;
+                size = Mathf.Max(size, Mathf.Abs(desiredPosToTarget.y));
 
-            size = Mathf.Max (size, Mathf.Abs (desiredPosToTarget.y));
-
-            size = Mathf.Max (size, Mathf.Abs (desiredPosToTarget.x) / camera.aspect);
+                size = Mathf.Max(size, Mathf.Abs(desiredPosToTarget.x) / camera.aspect);
+            }
         }
         
         size += screenEdgeBuffer;
